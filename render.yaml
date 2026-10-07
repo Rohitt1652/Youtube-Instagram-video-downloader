@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: mediagrab-backend
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    healthCheckPath: /api/media/health
+    envVars:
+      - key: APP_NAME
+        value: MediaGrab
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: YTDLP_BINARY
+        value: yt-dlp
+      - key: FFMPEG_BINARY
+        value: ffmpeg
+      - key: MAX_MEDIA_DURATION
+        value: "1800"
+      - key: MAX_DOWNLOAD_SIZE_MB
+        value: "500"
+      - key: DOWNLOAD_TIMEOUT
+        value: "300"
+      - key: TEMP_FILE_TTL_HOURS
+        value: "2"
