@@ -17,6 +17,10 @@ services:
         generateValue: true
       - key: DB_CONNECTION
         value: sqlite
+      - key: CACHE_STORE
+        value: file
+      - key: SESSION_DRIVER
+        value: file
       - key: QUEUE_CONNECTION
         value: database
       - key: YTDLP_BINARY

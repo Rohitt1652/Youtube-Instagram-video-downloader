@@ -18,7 +18,7 @@ return [
     ],
 
     'binaries' => [
-        'ytdlp' => env('YTDLP_BINARY', 'python -m yt_dlp'),
+        'ytdlp' => env('YTDLP_BINARY', (PHP_OS_FAMILY === 'Windows' ? 'python -m yt_dlp' : 'yt-dlp')),
         'ffmpeg' => env('FFMPEG_BINARY', 'ffmpeg'),
     ],
 

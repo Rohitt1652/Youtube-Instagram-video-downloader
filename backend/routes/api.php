@@ -21,4 +21,5 @@ Route::prefix('media')->group(function () {
     Route::get('/file/{token}', [MediaController::class, 'downloadFile']);
 
     Route::get('/health', [MediaController::class, 'health']);
+    Route::get('/diagnostics', [MediaController::class, 'diagnostics']);
 });

@@ -1,8 +1,13 @@
 import axios from 'axios';
 
+// Render production backend URL by default, or overridden by VITE_API_URL
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  'https://youtube-instagram-video-downloader-l3e3.onrender.com/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
-  timeout: 30000,
+  baseURL: API_BASE_URL,
+  timeout: 60000,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',

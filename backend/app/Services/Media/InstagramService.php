@@ -38,13 +38,14 @@ class InstagramService implements MediaExtractorInterface
 
     public function getInfo(string $url): array
     {
-        $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'python -m yt_dlp'));
+        $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'yt-dlp'));
 
         $command = array_merge($binaryParts, [
             '--dump-single-json',
             '--no-warnings',
             '--no-check-certificates',
             '--skip-download',
+            '--force-ipv4',
             $url,
         ]);
 
@@ -147,13 +148,14 @@ class InstagramService implements MediaExtractorInterface
         $uniquePrefix = 'ig_' . Str::random(12);
         $outputTemplate = $tempDir . DIRECTORY_SEPARATOR . $uniquePrefix . '.%(ext)s';
 
-        $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'python -m yt_dlp'));
+        $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'yt-dlp'));
         $ffmpegBinary = config('media.binaries.ffmpeg', 'ffmpeg');
 
         $isAudio = str_starts_with($formatId, 'audio_');
         $command = array_merge($binaryParts, [
             '--no-warnings',
             '--no-check-certificates',
+            '--force-ipv4',
             '--ffmpeg-location', $ffmpegBinary,
             '--newline',
         ]);

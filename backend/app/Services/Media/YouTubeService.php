@@ -33,7 +33,7 @@ class YouTubeService implements MediaExtractorInterface
 
     public function getInfo(string $url): array
     {
-        $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'python -m yt_dlp'));
+        $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'yt-dlp'));
 
         $command = array_merge($binaryParts, [
             '--dump-single-json',
@@ -41,6 +41,9 @@ class YouTubeService implements MediaExtractorInterface
             '--no-check-certificates',
             '--no-playlist',
             '--skip-download',
+            '--force-ipv4',
+            '--extractor-args',
+            'youtube:player_client=android,web',
             $url,
         ]);
 
@@ -185,13 +188,16 @@ class YouTubeService implements MediaExtractorInterface
         $uniquePrefix = 'yt_' . Str::random(12);
         $outputTemplate = $tempDir . DIRECTORY_SEPARATOR . $uniquePrefix . '.%(ext)s';
 
-        $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'python -m yt_dlp'));
+        $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'yt-dlp'));
         $ffmpegBinary = config('media.binaries.ffmpeg', 'ffmpeg');
 
         $command = array_merge($binaryParts, [
             '--no-warnings',
             '--no-check-certificates',
             '--no-playlist',
+            '--force-ipv4',
+            '--extractor-args',
+            'youtube:player_client=android,web',
             '--newline', // Output line-by-line progress
             '--ffmpeg-location', $ffmpegBinary,
         ]);

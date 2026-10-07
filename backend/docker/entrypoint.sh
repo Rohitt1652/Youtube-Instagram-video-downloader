@@ -9,27 +9,27 @@ echo "==> Configuring Nginx on Port: $PORT"
 envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/sites-available/default
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-# Ensure storage directories exist
+# Ensure storage and database directories exist
 mkdir -p /var/www/html/storage/app/media_temp \
-         /var/www/html/storage/framework/cache \
+         /var/www/html/storage/framework/cache/data \
          /var/www/html/storage/framework/sessions \
          /var/www/html/storage/framework/views \
          /var/www/html/storage/logs \
-         /var/www/html/bootstrap/cache
+         /var/www/html/bootstrap/cache \
+         /var/www/html/database
 
-# If SQLite is configured and database file missing, initialize it
-if [ "${DB_CONNECTION:-}" = "sqlite" ] && [ ! -f "/var/www/html/database/database.sqlite" ]; then
-    touch /var/www/html/database/database.sqlite
-    chown www-data:www-data /var/www/html/database/database.sqlite
-fi
+# Ensure database.sqlite file exists
+touch /var/www/html/database/database.sqlite
 
-# Fix ownership and permissions for Laravel storage
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Fix ownership and permissions for Laravel storage, bootstrap cache, and database
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
 # Run database migrations if database is connected
 echo "==> Running Laravel Migrations..."
 php /var/www/html/artisan migrate --force || echo "Warning: Migration failed or database not ready yet."
+chown -R www-data:www-data /var/www/html/database /var/www/html/storage
+chmod -R 775 /var/www/html/database /var/www/html/storage
 
 # Cache configuration, routes, and views for maximum performance
 echo "==> Caching Laravel configuration..."

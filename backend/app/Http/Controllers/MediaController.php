@@ -281,4 +281,53 @@ class MediaController extends Controller
             ],
         ]);
     }
+
+    /**
+     * GET /api/media/diagnostics
+     * Comprehensive system and tool diagnostics.
+     */
+    public function diagnostics(): JsonResponse
+    {
+        $cacheWritable = false;
+        $cacheError = null;
+        try {
+            \Illuminate\Support\Facades\Cache::put('diag_test', 'ok', 60);
+            $cacheWritable = \Illuminate\Support\Facades\Cache::get('diag_test') === 'ok';
+        } catch (\Throwable $e) {
+            $cacheError = $e->getMessage();
+        }
+
+        $ytdlpVersion = null;
+        $ytdlpError = null;
+        try {
+            $ytdlpBin = config('media.binaries.ytdlp', 'yt-dlp');
+            $proc = new \Symfony\Component\Process\Process(explode(' ', $ytdlpBin . ' --version'));
+            $proc->run();
+            $ytdlpVersion = trim($proc->getOutput());
+            if ($proc->getExitCode() !== 0) {
+                $ytdlpError = trim($proc->getErrorOutput());
+            }
+        } catch (\Throwable $e) {
+            $ytdlpError = $e->getMessage();
+        }
+
+        $dbPath = database_path('database.sqlite');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'php_version' => PHP_VERSION,
+                'cache_driver' => config('cache.default'),
+                'cache_writable' => $cacheWritable,
+                'cache_error' => $cacheError,
+                'ytdlp_bin' => config('media.binaries.ytdlp'),
+                'ytdlp_version' => $ytdlpVersion,
+                'ytdlp_error' => $ytdlpError,
+                'database_file_exists' => file_exists($dbPath),
+                'database_file_writable' => is_writable($dbPath),
+                'database_dir_writable' => is_writable(database_path()),
+                'temp_dir_writable' => is_writable(storage_path('app/media_temp')),
+            ],
+        ]);
+    }
 }
