@@ -31,6 +31,26 @@ class YouTubeService implements MediaExtractorInterface
         return 'youtube';
     }
 
+    protected function getCookieArgs(): array
+    {
+        $cookieFile = storage_path('app/cookies.txt');
+
+        $envCookies = env('YTDLP_COOKIES');
+        if (!empty($envCookies)) {
+            $dir = dirname($cookieFile);
+            if (!File::isDirectory($dir)) {
+                File::makeDirectory($dir, 0755, true);
+            }
+            File::put($cookieFile, $envCookies);
+        }
+
+        if (File::exists($cookieFile) && filesize($cookieFile) > 0) {
+            return ['--cookies', $cookieFile];
+        }
+
+        return [];
+    }
+
     public function getInfo(string $url): array
     {
         $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'yt-dlp'));
@@ -42,8 +62,7 @@ class YouTubeService implements MediaExtractorInterface
             '--no-playlist',
             '--skip-download',
             '--force-ipv4',
-            '--extractor-args',
-            'youtube:player_client=android,web',
+        ], $this->getCookieArgs(), [
             $url,
         ]);
 
@@ -196,11 +215,9 @@ class YouTubeService implements MediaExtractorInterface
             '--no-check-certificates',
             '--no-playlist',
             '--force-ipv4',
-            '--extractor-args',
-            'youtube:player_client=android,web',
             '--newline', // Output line-by-line progress
             '--ffmpeg-location', $ffmpegBinary,
-        ]);
+        ], $this->getCookieArgs());
 
         $isAudio = str_starts_with($formatId, 'audio_');
         $expectedExt = 'mp4';
@@ -299,6 +316,9 @@ class YouTubeService implements MediaExtractorInterface
 
         if (str_contains($lower, 'private video') || str_contains($lower, 'this video is private')) {
             throw new MediaUnavailableException('This video is private and cannot be downloaded.');
+        }
+        if (str_contains($lower, "sign in to confirm you're not a bot") || str_contains($lower, "confirm you're not a bot") || (str_contains($lower, 'sign in') && str_contains($lower, 'bot'))) {
+            throw new MediaUnavailableException('YouTube bot protection triggered on cloud server. Please provide cookies (YTDLP_COOKIES) or try another video.');
         }
         if (str_contains($lower, 'sign in') || str_contains($lower, 'age-restricted') || str_contains($lower, 'confirm your age')) {
             throw new MediaUnavailableException('This video is age-restricted or requires authentication.');

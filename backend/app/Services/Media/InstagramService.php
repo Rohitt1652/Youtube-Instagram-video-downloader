@@ -36,6 +36,26 @@ class InstagramService implements MediaExtractorInterface
         return 'instagram';
     }
 
+    protected function getCookieArgs(): array
+    {
+        $cookieFile = storage_path('app/cookies.txt');
+
+        $envCookies = env('YTDLP_COOKIES');
+        if (!empty($envCookies)) {
+            $dir = dirname($cookieFile);
+            if (!File::isDirectory($dir)) {
+                File::makeDirectory($dir, 0755, true);
+            }
+            File::put($cookieFile, $envCookies);
+        }
+
+        if (File::exists($cookieFile) && filesize($cookieFile) > 0) {
+            return ['--cookies', $cookieFile];
+        }
+
+        return [];
+    }
+
     public function getInfo(string $url): array
     {
         $binaryParts = $this->executor->parseBinary(config('media.binaries.ytdlp', 'yt-dlp'));
@@ -46,6 +66,7 @@ class InstagramService implements MediaExtractorInterface
             '--no-check-certificates',
             '--skip-download',
             '--force-ipv4',
+        ], $this->getCookieArgs(), [
             $url,
         ]);
 
@@ -158,7 +179,7 @@ class InstagramService implements MediaExtractorInterface
             '--force-ipv4',
             '--ffmpeg-location', $ffmpegBinary,
             '--newline',
-        ]);
+        ], $this->getCookieArgs());
 
         if ($isAudio) {
             $command = array_merge($command, [
