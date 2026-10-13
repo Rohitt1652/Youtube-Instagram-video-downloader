@@ -68,8 +68,19 @@ Under the **"Environment Variables"** section in Render, add:
 | `MAX_DOWNLOAD_SIZE_MB`| `500` | Max 500 MB |
 | `DOWNLOAD_TIMEOUT` | `300` | 5 minute timeout |
 | `TEMP_FILE_TTL_HOURS`| `2` | Purge files after 2 hours |
+| `YTDLP_COOKIES` | *(Optional / Recommended for YouTube)* | Netscape format cookies text to bypass YouTube bot detection on cloud servers |
 
 *(Note: If you have an external MySQL database from Railway, Aiven, or Supabase, set `DB_CONNECTION=mysql` and provide `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).*
+
+### 🍪 Bypassing YouTube Cloud Bot Protection (YTDLP_COOKIES)
+YouTube blocks requests from cloud datacenter IPs (like Render) with `"Sign in to confirm you're not a bot"`. To bypass this:
+1. Install a browser extension like **"Get cookies.txt LOCALLY"** (Chrome / Firefox).
+2. Log into YouTube (recommended: use a secondary/burner Google account).
+3. Export cookies for `youtube.com` in Netscape format.
+4. In Render Dashboard $\rightarrow$ Web Service $\rightarrow$ **Environment**:
+   - Add **`YTDLP_COOKIES`** variable and paste the full content of `cookies.txt`.
+   - *OR* in **Secret Files**, create a secret file named `cookies.txt` with contents pasted.
+5. Save changes. Render will redeploy and yt-dlp will authenticate successfully.
 
 ---
 

@@ -24,6 +24,8 @@ return [
 
     'temp_directory' => storage_path('app/media_temp'),
 
+    'cookies' => env('YTDLP_COOKIES'),
+
     'allowed_domains' => [
         'youtube' => [
             'youtube.com',

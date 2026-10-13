@@ -38,9 +38,16 @@ class InstagramService implements MediaExtractorInterface
 
     protected function getCookieArgs(): array
     {
+        // 1. Check if Render Secret File exists at /etc/secrets/cookies.txt
+        $secretFile = '/etc/secrets/cookies.txt';
+        if (File::exists($secretFile) && filesize($secretFile) > 0) {
+            return ['--cookies', $secretFile];
+        }
+
+        // 2. Check local cookies.txt in storage or environment
         $cookieFile = storage_path('app/cookies.txt');
 
-        $envCookies = env('YTDLP_COOKIES');
+        $envCookies = config('media.cookies') ?: env('YTDLP_COOKIES') ?: getenv('YTDLP_COOKIES');
         if (!empty($envCookies)) {
             $dir = dirname($cookieFile);
             if (!File::isDirectory($dir)) {
